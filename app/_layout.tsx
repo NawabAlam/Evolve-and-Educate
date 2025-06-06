@@ -1,29 +1,33 @@
-import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
-import { useFonts } from 'expo-font';
-import { Stack } from 'expo-router';
-import { StatusBar } from 'expo-status-bar';
-import 'react-native-reanimated';
+import { useFonts } from "expo-font";
+import { Stack } from "expo-router";
+import * as SplashScreen from "expo-splash-screen";
+import { useEffect, useState } from "react";
+import { UserDetailProvider } from "./../context/UserDetailContext";
 
-import { useColorScheme } from '@/hooks/useColorScheme';
+SplashScreen.preventAutoHideAsync(); // Keep splash visible while loading
 
 export default function RootLayout() {
-  const colorScheme = useColorScheme();
-  const [loaded] = useFonts({
-    SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
+  const [userDetail, setUserDetail] = useState(null);
+
+  const [fontsLoaded] = useFonts({
+    manrope: require("./../assets/fonts/Manrope-Regular.ttf"),
+    manropemed: require("./../assets/fonts/Manrope-Medium.ttf"),
+    manropebold: require("./../assets/fonts/Manrope-Bold.ttf"),
   });
 
-  if (!loaded) {
-    // Async font loading only occurs in development.
-    return null;
+  useEffect(() => {
+    if (fontsLoaded) {
+      SplashScreen.hideAsync(); // Hide splash when fonts are ready
+    }
+  }, [fontsLoaded]);
+
+  if (!fontsLoaded) {
+    return null; // Wait until fonts are loaded
   }
 
   return (
-    <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-      <Stack>
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        <Stack.Screen name="+not-found" />
-      </Stack>
-      <StatusBar style="auto" />
-    </ThemeProvider>
+    <UserDetailProvider> 
+      <Stack screenOptions={{ headerShown: false }} />
+    </UserDetailProvider>
   );
 }

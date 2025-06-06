@@ -1,0 +1,40 @@
+Terms of Service
+EffectiveDate: 02-06-2025
+
+Welcome to Evolve & Educate (EvoEd) ("we," "our," "us"). By accessing or using our mobile application ("App") and services ("Services"), you agree to be bound by these Terms of Service ("Terms"). If you do not agree to these Terms, please do not use our App or Services.
+
+Use of Our Services
+You must be at least 13 years old (or the minimum age in your jurisdiction) to use our Services. You agree to use the App only for lawful purposes and in accordance with these Terms. You must provide accurate, complete, and updated registration information if you create an account.
+
+User Accounts
+You are responsible for safeguarding your login credentials. You are responsible for all activities that occur under your account. We reserve the right to suspend or terminate accounts that violate these Terms.
+
+Intellectual Property
+All content provided through our App, including text, graphics, logos, icons, images, audio clips, and software, is the property of Evolve & Educate (EvoEd) or its licensors. You may not reproduce, distribute, modify, create derivative works of, publicly display, or exploit any part of the App without our prior written permission.
+
+AI-Generated Content
+Our App uses AI technology (Google Gemini AI) to generate course material, quizzes, practice tests, flashcards, and suggestions. AI-generated content is provided for informational and educational purposes only. We do not guarantee its completeness, accuracy, or suitability for your particular needs.
+
+Prohibited Activities
+You agree not to use the App for any unlawful purpose, reverse engineer, decompile, or disassemble any part of the App, interfere with or disrupt the integrity or performance of the Services, or upload or distribute viruses, worms, or any malicious software.
+
+Payment and Subscriptions
+Certain features may require payment. All applicable fees are disclosed before purchase. Subscriptions, if applicable, automatically renew unless canceled before the end of the billing cycle.
+
+Termination
+We may suspend or terminate your access to the App at any time, without prior notice, if you breach these Terms or misuse the Services.
+
+Disclaimer of Warranties
+The App and Services are provided "as is" and "as available." We disclaim all warranties, express or implied, including but not limited to warranties of merchantability, fitness for a particular purpose, and non-infringement.
+
+Limitation of Liability
+To the maximum extent permitted by law, Evolve & Educate (EvoEd) shall not be liable for any indirect, incidental, special, consequential, or punitive damages.
+
+Changes to Terms
+We reserve the right to modify these Terms at any time. We will notify you of material changes via the App or by email.
+
+Governing Law
+These Terms are governed by and construed in accordance with the laws of India.
+
+Contact Information
+For any questions about these Terms, please contact us at: nawabmohammad83@gmail.com.
