@@ -11,13 +11,13 @@ import { getStorage } from 'firebase/storage'; // <-- Added
 
 // Firebase config
 const firebaseConfig = {
-  apiKey: 'AIzaSyBYBITidCHrsiy7doQKN1h9FMcBXnHLp44',
-  authDomain: 'evoed-c763e.firebaseapp.com',
-  projectId: 'evoed-c763e',
-  storageBucket: 'evoed-c763e.firebasestorage.app',
-  messagingSenderId: '605360201897',
-  appId: '1:605360201897:web:8bbb91084a676398bb89b8',
-  measurementId: 'G-PF4YN7L6QJ',
+  apiKey: 'Api',
+  authDomain: '',
+  projectId: '',
+  storageBucket: '',
+  messagingSenderId: '',
+  appId: ':web:',
+  measurementId: '',
 };
 
 // Initialize Firebase app only once
