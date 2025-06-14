@@ -1,8 +1,8 @@
-import { View, Text, Image, StyleSheet, FlatList, ScrollView } from "react-native";
-import React, { useEffect, useState } from "react";
-import { router, useLocalSearchParams, useRouter } from "expo-router";
-import Colors from "../../constant/Colors";
+import { useLocalSearchParams, useRouter } from "expo-router";
+import { useEffect, useState } from "react";
+import { FlatList, Image, ScrollView, StyleSheet, Text, View } from "react-native";
 import Button from "../../components/Shared/Button";
+import Colors from "../../constant/Colors";
 
 
 export default function QuizSummary() {

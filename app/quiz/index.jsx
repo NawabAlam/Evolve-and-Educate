@@ -1,19 +1,19 @@
+import Ionicons from "@expo/vector-icons/Ionicons";
+import { router, useLocalSearchParams } from "expo-router";
+import { doc, updateDoc } from "firebase/firestore";
+import { useState } from "react";
 import {
-  View,
-  Text,
+  Dimensions,
   Image,
   Pressable,
-  Dimensions,
+  Text,
   TouchableOpacity,
+  View,
 } from "react-native";
-import React, { useState } from "react";
-import { router, useLocalSearchParams } from "expo-router";
-import Ionicons from "@expo/vector-icons/Ionicons";
-import Colors from "../../constant/Colors";
 import * as Progress from "react-native-progress";
-import Button from "./../../components/Shared/Button";
-import { doc, updateDoc } from "firebase/firestore";
 import { db } from "../../config/firebaseConfig";
+import Colors from "../../constant/Colors";
+import Button from "./../../components/Shared/Button";
 
 export default function Quiz() {
   const { courseParams } = useLocalSearchParams();

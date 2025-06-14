@@ -238,7 +238,9 @@ export default function Intro({ course }) {
         }}
         onPress={() => route.push("/(tabs)/home")}
       >
-        <Ionicons name="arrow-back" size={25} color="black" />
+        <Ionicons 
+        style={{ marginTop: 10 }}
+        name="arrow-back" size={25} color="black" />
       </Pressable>
     </View>
   );

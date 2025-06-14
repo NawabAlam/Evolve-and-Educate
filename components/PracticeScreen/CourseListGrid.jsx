@@ -1,8 +1,7 @@
-import { View, Text, FlatList, Image, TouchableOpacity } from "react-native";
-import React from "react";
-import Colors from "../../constant/Colors";
 import AntDesign from "@expo/vector-icons/AntDesign";
 import { useRouter } from "expo-router";
+import { FlatList, Image, Text, TouchableOpacity, View } from "react-native";
+import Colors from "../../constant/Colors";
 
 export default function CourseListGrid({ courseList, option }) {
   const router = useRouter();

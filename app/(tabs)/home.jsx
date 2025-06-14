@@ -1,21 +1,35 @@
-import { View, Text, Platform, FlatList, Image } from "react-native";
-import React, { useContext, useEffect, useState } from "react";
+import { Ionicons } from "@expo/vector-icons";
+import { router } from "expo-router";
+import { collection, getDocs, query, where } from "firebase/firestore";
+import { useContext, useEffect, useState } from "react";
+import {
+  FlatList,
+  Image,
+  Platform,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
+import CourseList from "../../components/Home/CourseList";
+import CourseProgress from "../../components/Home/CourseProgress";
 import Header from "../../components/Home/Header";
-import Colors from "./../../constant/Colors";
 import NoCourse from "../../components/Home/NoCourse";
-import { collection, doc, getDocs, query, where } from "firebase/firestore";
+import PracticeSection from "../../components/Home/PracticeSection";
 import { db } from "../../config/firebaseConfig";
 import { UserDetailContext } from "../../context/UserDetailContext";
-import CourseList from "../../components/Home/CourseList";
-import PracticeSection from "../../components/Home/PracticeSection";
-import CourseProgress from "../../components/Home/CourseProgress";
+import { checkAndStartUpdate } from "../../utils/inAppUpdate";
+import Colors from "./../../constant/Colors";
+import { useUpdatePopup } from "./../../utils/useUpdatePopup";
+
 
 export default function Home() {
   const { userDetail, setUserDetail } = useContext(UserDetailContext);
   const [courseList, setCourseList] = useState([]);
   const [loading, setLoading] = useState(false);
 
+  useUpdatePopup(); // Custom hook to show update popup
   useEffect(() => {
+     checkAndStartUpdate();
     userDetail && GetCourseList();
   }, [userDetail]);
 
@@ -81,6 +95,37 @@ export default function Home() {
                 <CourseProgress courseList={courseList} />
                 <PracticeSection />
                 <CourseList courseList={courseList} />
+                {/* ✅ Add Course Button */}
+                <TouchableOpacity
+                  style={{
+                    flexDirection: "row",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    marginTop: 20,
+                    padding: 12,
+                    borderRadius: 10,
+                    borderWidth: 1,
+                    borderColor: Colors.LANDING,
+                    backgroundColor: "#f0f8ff",
+                  }}
+                  onPress={() => router.push("/addCourse")}
+                >
+                  <Ionicons
+                    name="add-circle-outline"
+                    size={24}
+                    color={Colors.LANDING}
+                    style={{ marginRight: 10 }}
+                  />
+                  <Text
+                    style={{
+                      fontSize: 16,
+                      color: Colors.LANDING,
+                      fontFamily: "manropebold",
+                    }}
+                  >
+                    Add Course
+                  </Text>
+                </TouchableOpacity>
               </View>
             )}
           </View>

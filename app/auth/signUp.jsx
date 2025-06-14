@@ -1,10 +1,5 @@
-import * as Google from "expo-auth-session/providers/google";
 import { useRouter } from "expo-router";
-import {
-  createUserWithEmailAndPassword,
-  GoogleAuthProvider,
-  signInWithCredential,
-} from "firebase/auth";
+import { createUserWithEmailAndPassword } from "firebase/auth";
 import { doc, getDoc, setDoc } from "firebase/firestore";
 import { useContext, useEffect, useState } from "react";
 import {
@@ -27,8 +22,6 @@ import {
   TermsPrivacyModal,
 } from "./../../components/Terms & Services/ModalPopup";
 
-import GoogleLogo from "./../../assets/images/google_logo.png"; // Add your Google logo here
-
 export default function SignUp() {
   const router = useRouter();
   const [passwordVisible, setPasswordVisible] = useState(false);
@@ -46,28 +39,6 @@ export default function SignUp() {
   const [privacyContent, setPrivacyContent] = useState("");
 
   const { setUserDetail } = useContext(UserDetailContext);
-
-  const redirectUri = "https://auth.expo.io/@nawabalam/EvoEd";
-  console.log("👉 Redirect URI:", redirectUri);
-
-  const [request, response, promptAsync] = Google.useAuthRequest(
-    {
-      expoClientId:
-        "605360201897-jrj4ctcgon2itbgq6np4k4a2fb237mrh.apps.googleusercontent.com",
-      androidClientId:
-        "605360201897-odt52d31pi5rl1e3fpn4ej0hiuushjqh.apps.googleusercontent.com",
-      iosClientId:
-        "605360201897-vnj34r462s7q0hv8i1r8mbekiniievv3.apps.googleusercontent.com",
-      webClientId:
-        "605360201897-9r0gtddpk2mv6gt7ik13ijn7lcll79k9.apps.googleusercontent.com",
-      scopes: ["profile", "email"],
-       responseType: "id_token",
-      redirectUri,
-    },
-    {
-      useProxy: true,
-    }
-  );
 
   useEffect(() => {
     const fetchLegalContent = async () => {
@@ -89,41 +60,6 @@ export default function SignUp() {
 
     fetchLegalContent();
   }, []);
-
-  useEffect(() => {
-    if (response?.type === "success") {
-      const { id_token } = response.params;
-      if (!id_token) {
-        console.error("No ID token found in response:", response);
-        alert("Failed to sign in with Google: No token found.");
-        return;
-      }
-      const credential = GoogleAuthProvider.credential(id_token);
-      signInWithCredential(auth, credential)
-        .then(async (userCredential) => {
-          const user = userCredential.user;
-          // Save Google user info to Firestore if not existing
-          const userDoc = await getDoc(doc(db, "users", user.email));
-          if (!userDoc.exists()) {
-            const data = {
-              name: user.displayName || "",
-              email: user.email,
-              member: false,
-              uid: user.uid,
-            };
-            await setDoc(doc(db, "users", user.email), data);
-            setUserDetail(data);
-          } else {
-            setUserDetail(userDoc.data());
-          }
-          router.push("/home"); // Redirect after success
-        })
-        .catch((error) => {
-          console.error("Google sign-in error:", error);
-          alert("Google sign-in failed. Please try again.");
-        });
-    }
-  }, [response]);
 
   const isValidEmail = (email) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -212,12 +148,15 @@ export default function SignUp() {
 
       <TextInput
         placeholder="Full Name"
+        placeholderTextColor= {Colors.LANDING}
         value={fullName}
         onChangeText={setFullName}
         style={styles.textInput}
+        autoCapitalize="words"
       />
       <TextInput
         placeholder="Email"
+        placeholderTextColor= {Colors.LANDING}
         value={email}
         onChangeText={setEmail}
         style={styles.textInput}
@@ -228,6 +167,7 @@ export default function SignUp() {
       <View style={styles.passwordContainer}>
         <TextInput
           placeholder="Password"
+          placeholderTextColor= {Colors.LANDING}
           value={password}
           onChangeText={setPassword}
           secureTextEntry={!passwordVisible}
@@ -291,41 +231,6 @@ export default function SignUp() {
             Create Account
           </Text>
         )}
-      </TouchableOpacity>
-
-      {/* Styled Google Sign-Up Button */}
-      <TouchableOpacity
-        onPress={() => promptAsync()}
-        disabled={!request}
-        style={{
-          flexDirection: "row",
-          alignItems: "center",
-          justifyContent: "center",
-          padding: 12,
-          backgroundColor: "#fff",
-          borderColor: "#000",
-          borderWidth: 1,
-          borderRadius: 10,
-          width: "100%",
-          marginTop: 10,
-          elevation: 2,
-        }}
-      >
-        <Image
-          source={GoogleLogo}
-          style={{ width: 24, height: 24, marginRight: 10 }}
-          resizeMode="contain"
-        />
-        <Text
-          style={{
-            fontFamily: "manrope",
-            fontSize: 18,
-            color: "#000",
-            textAlign: "center",
-          }}
-        >
-          Sign Up with Google
-        </Text>
       </TouchableOpacity>
 
       <View

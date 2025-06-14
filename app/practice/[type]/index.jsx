@@ -1,20 +1,19 @@
-import { View, Text, Image, Pressable, ActivityIndicator } from "react-native";
-import React, { useContext, useEffect, useState } from "react";
-import { useLocalSearchParams, useRouter } from "expo-router";
-import { imageAssets, PraticeOption } from "../../../constant/Option";
-import Colors from "../../../constant/Colors";
 import Ionicons from "@expo/vector-icons/Ionicons";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import {
   collection,
-  doc,
   getDocs,
   orderBy,
   query,
-  where,
+  where
 } from "firebase/firestore";
+import { useContext, useEffect, useState } from "react";
+import { ActivityIndicator, Image, Pressable, ScrollView, Text, View } from "react-native";
+import Colors from "../../../constant/Colors";
+import { PraticeOption } from "../../../constant/Option";
+import CourseListGrid from './../../../components/PracticeScreen/CourseListGrid';
 import { db } from "./../../../config/firebaseConfig";
 import { UserDetailContext } from "./../../../context/UserDetailContext";
-import CourseListGrid from './../../../components/PracticeScreen/CourseListGrid'
 
 export default function PracticeTypeHomeScreen() {
   const { type } = useLocalSearchParams();
@@ -50,7 +49,7 @@ export default function PracticeTypeHomeScreen() {
     }
   };
   return (
-    <View>
+    <ScrollView>
       <Image
         source={option.image}
         style={{
@@ -102,6 +101,6 @@ export default function PracticeTypeHomeScreen() {
       <CourseListGrid courseList={courseList}
       option={option}
       />
-    </View>
+    </ScrollView>
   );
 }

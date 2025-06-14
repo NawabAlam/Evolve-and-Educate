@@ -1,14 +1,7 @@
-import * as AuthSession from "expo-auth-session";
-import * as Google from "expo-auth-session/providers/google";
 import { useRouter } from "expo-router";
-import * as WebBrowser from "expo-web-browser";
-import {
-  GoogleAuthProvider,
-  signInWithCredential,
-  signInWithEmailAndPassword,
-} from "firebase/auth";
-import { doc, getDoc, setDoc } from "firebase/firestore";
-import { useContext, useEffect, useState } from "react";
+import { signInWithEmailAndPassword } from "firebase/auth";
+import { doc, getDoc } from "firebase/firestore";
+import { useContext, useState } from "react";
 import {
   ActivityIndicator,
   Alert,
@@ -25,8 +18,6 @@ import { auth, db } from "../../config/firebaseConfig";
 import Colors from "../../constant/Colors";
 import { UserDetailContext } from "../../context/UserDetailContext";
 
-WebBrowser.maybeCompleteAuthSession();
-
 export default function SignIn() {
   const router = useRouter();
   const [email, setEmail] = useState("");
@@ -34,67 +25,6 @@ export default function SignIn() {
   const [loading, setLoading] = useState(false);
   const [passwordVisible, setPasswordVisible] = useState(false);
   const { setUserDetail } = useContext(UserDetailContext);
-
-  // Google Auth Request
-  const [request, response, promptAsync] = Google.useAuthRequest({
-    expoClientId:
-      "605360201897-jrj4ctcgon2itbgq6np4k4a2fb237mrh.apps.googleusercontent.com",
-    androidClientId:
-      "605360201897-odt52d31pi5rl1e3fpn4ej0hiuushjqh.apps.googleusercontent.com",
-    iosClientId:
-      "605360201897-vnj34r462s7q0hv8i1r8mbekiniievv3.apps.googleusercontent.com",
-    webClientId:
-      "605360201897-9r0gtddpk2mv6gt7ik13ijn7lcll79k9.apps.googleusercontent.com",
-    scopes: ["profile", "email"],
-    redirectUri: AuthSession.makeRedirectUri({ useProxy: true }),
-  });
-
-  // Handle Google Auth response
-  useEffect(() => {
-    if (response?.type === "success") {
-      const id_token =
-        response.authentication?.idToken || response.authentication?.id_token;
-
-      if (!id_token) {
-        ToastAndroid.show("Google sign-in failed: Missing ID token", ToastAndroid.BOTTOM);
-        console.error("Missing id_token in response.authentication:", response.authentication);
-        return;
-      }
-
-      const credential = GoogleAuthProvider.credential(id_token);
-      handleGoogleSignIn(credential);
-    }
-  }, [response]);
-
-  const handleGoogleSignIn = async (credential) => {
-    setLoading(true);
-    try {
-      const result = await signInWithCredential(auth, credential);
-      const userEmail = result.user.email;
-
-      const userRef = doc(db, "users", userEmail);
-      const userSnap = await getDoc(userRef);
-
-      if (!userSnap.exists()) {
-        await setDoc(userRef, {
-          email: userEmail,
-          name: result.user.displayName || "",
-          photoURL: result.user.photoURL || "",
-          createdAt: new Date(),
-        });
-      }
-
-      const updatedSnap = await getDoc(userRef);
-      setUserDetail(updatedSnap.data());
-      ToastAndroid.show("Google Sign-in Successful!", ToastAndroid.BOTTOM);
-      router.replace("/(tabs)/home");
-    } catch (err) {
-      ToastAndroid.show("Google Sign-in failed", ToastAndroid.BOTTOM);
-      console.error("Google Sign-in error:", err);
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const onSignInClick = async () => {
     if (!email || !password) {
@@ -139,28 +69,17 @@ export default function SignIn() {
     setUserDetail(result.data());
   };
 
-  // Custom Google Button styled similar to official button
-  const GoogleSignInButton = () => (
-    <TouchableOpacity
-      disabled={!request || loading}
-      onPress={() => promptAsync()}
-      style={styles.googleButton}
-    >
-      <Image
-        source={require("../../assets/images/google_logo.png")} // Add a Google logo png in your assets folder
-        style={styles.googleLogo}
-      />
-      <Text style={styles.googleButtonText}>Sign In with Google</Text>
-    </TouchableOpacity>
-  );
-
   return (
     <View style={styles.container}>
-      <Image source={require("../../assets/images/logo.png")} style={styles.logo} />
+      <Image
+        source={require("../../assets/images/logo.png")}
+        style={styles.logo}
+      />
       <Text style={styles.title}>Welcome Back</Text>
 
       <TextInput
         placeholder="Email"
+        placeholderTextColor="#888"
         onChangeText={setEmail}
         style={styles.textInput}
         keyboardType="email-address"
@@ -170,20 +89,30 @@ export default function SignIn() {
       <View style={styles.passwordContainer}>
         <TextInput
           placeholder="Password"
+          placeholderTextColor="#888"
           onChangeText={setPassword}
           secureTextEntry={!passwordVisible}
           style={[styles.textInput, styles.passwordInput]}
         />
-        <Pressable onPress={() => setPasswordVisible(!passwordVisible)} style={styles.eyeIcon}>
+        <Pressable
+          onPress={() => setPasswordVisible(!passwordVisible)}
+          style={styles.eyeIcon}
+        >
           <Text>{passwordVisible ? "👁" : "👁‍🗨"}</Text>
         </Pressable>
       </View>
 
-      <TouchableOpacity onPress={onSignInClick} style={styles.signInButton} disabled={loading}>
-        {loading ? <ActivityIndicator color={Colors.WHITE} /> : <Text style={styles.signInText}>Sign In</Text>}
+      <TouchableOpacity
+        onPress={onSignInClick}
+        style={styles.signInButton}
+        disabled={loading}
+      >
+        {loading ? (
+          <ActivityIndicator color={Colors.WHITE} />
+        ) : (
+          <Text style={styles.signInText}>Sign In</Text>
+        )}
       </TouchableOpacity>
-
-      <GoogleSignInButton />
 
       <View style={styles.bottomRow}>
         <Text style={styles.linkText}>Ready to evolve?</Text>
@@ -247,29 +176,6 @@ const styles = StyleSheet.create({
     fontSize: 20,
     color: Colors.WHITE,
     textAlign: "center",
-  },
-  googleButton: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    padding: 14,
-    backgroundColor: Colors.WHITE,
-    borderWidth: 1,
-    borderColor: "#4285F4",
-    borderRadius: 5,
-    width: "100%",
-    marginTop: 15,
-    elevation: 3,
-  },
-  googleLogo: {
-    width: 24,
-    height: 24,
-    marginRight: 10,
-  },
-  googleButtonText: {
-    color: "#4285F4",
-    fontSize: 16,
-    fontWeight: "600",
   },
   bottomRow: {
     display: "flex",

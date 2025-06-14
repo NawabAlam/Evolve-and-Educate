@@ -2,20 +2,29 @@ import { Ionicons, MaterialIcons } from "@expo/vector-icons";
 import * as ImagePicker from "expo-image-picker";
 import { useRouter } from "expo-router";
 import { sendPasswordResetEmail, signOut } from "firebase/auth";
-import { doc, updateDoc } from "firebase/firestore";
+import {
+  deleteDoc,
+  doc,
+  getDoc,
+  setDoc,
+  updateDoc
+} from "firebase/firestore";
 import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
-import { useContext, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import {
   ActivityIndicator,
   Alert,
+  Button,
   Image,
+  Modal,
   ScrollView,
   StyleSheet,
   Text,
+  TextInput,
   TouchableOpacity,
   View,
 } from "react-native";
-import { auth, db, storage } from "../../config/firebaseConfig"; // storage added in firebaseConfig
+import { auth, db, storage } from "../../config/firebaseConfig";
 import Colors from "../../constant/Colors";
 import { UserDetailContext } from "../../context/UserDetailContext";
 
@@ -23,6 +32,22 @@ export default function Profile() {
   const { userDetail, setUserDetail, updateUserProfileImage } = useContext(UserDetailContext);
   const router = useRouter();
   const [uploading, setUploading] = useState(false);
+  const [showReasonModal, setShowReasonModal] = useState(false);
+  const [deletionReason, setDeletionReason] = useState("");
+  const [hasRequestedDeletion, setHasRequestedDeletion] = useState(false);
+
+  useEffect(() => {
+    const checkDeletionRequest = async () => {
+      if (!userDetail?.email) return;
+      const docRef = doc(db, "deletionRequests", userDetail.email);
+      const docSnap = await getDoc(docRef);
+      if (docSnap.exists()) {
+        setHasRequestedDeletion(true);
+      }
+    };
+
+    checkDeletionRequest();
+  }, [userDetail]);
 
   const handleLogout = async () => {
     try {
@@ -38,10 +63,7 @@ export default function Profile() {
   const handlePasswordReset = async () => {
     try {
       await sendPasswordResetEmail(auth, userDetail?.email);
-      Alert.alert(
-        "Reset Email Sent",
-        "Please check your email to reset your password."
-      );
+      Alert.alert("Reset Email Sent", "Please check your email to reset your password.");
     } catch (error) {
       console.log("Password Reset Error:", error.message);
       Alert.alert("Error", error.message);
@@ -50,15 +72,9 @@ export default function Profile() {
 
   const pickImage = async () => {
     try {
-      console.log("Profile image clicked");
-
-      const permissionResult =
-        await ImagePicker.requestMediaLibraryPermissionsAsync();
+      const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
       if (!permissionResult.granted) {
-        Alert.alert(
-          "Permission required",
-          "Permission to access media library is required!"
-        );
+        Alert.alert("Permission required", "Permission to access media library is required!");
         return;
       }
 
@@ -68,8 +84,6 @@ export default function Profile() {
         aspect: [1, 1],
         quality: 0.7,
       });
-
-      console.log(result);
 
       if (!result.canceled) {
         uploadImage(result.assets[0].uri);
@@ -90,14 +104,10 @@ export default function Profile() {
       const storageRef = ref(storage, `profileImages/${filename}`);
 
       await uploadBytes(storageRef, blob);
-
       const downloadURL = await getDownloadURL(storageRef);
 
-      // Update Firestore
       const userDocRef = doc(db, "users", userDetail.email);
       await updateDoc(userDocRef, { profileImage: downloadURL });
-
-      // Update Firebase Auth + Context
       await updateUserProfileImage(downloadURL);
 
       Alert.alert("Success", "Profile image updated successfully!");
@@ -106,6 +116,48 @@ export default function Profile() {
       Alert.alert("Upload Error", error.message);
     } finally {
       setUploading(false);
+    }
+  };
+
+  const handleRequestDeletion = async () => {
+  if (!deletionReason.trim()) {
+    Alert.alert("Reason Required", "Please enter a reason.");
+    return;
+  }
+
+  try {
+    const docRef = doc(db, "deletionRequests", userDetail.email);
+    await setDoc(docRef, {
+      email: userDetail.email,
+      reason: deletionReason,
+      requestedAt: new Date().toISOString(),
+    });
+
+    setShowReasonModal(false);
+    setHasRequestedDeletion(true);
+
+    Alert.alert(
+      "Request Submitted",
+      "Your data will be deleted within 15 days. You have been logged out for security. If you change your mind, you can cancel the request within this period.",
+    );
+
+    handleLogout(); // Log the user out after request
+  } catch (error) {
+    console.log("Data Deletion Request Error:", error.message);
+    Alert.alert("Error", error.message);
+  }
+};
+
+
+  const handleCancelDeletion = async () => {
+    try {
+      const docRef = doc(db, "deletionRequests", userDetail.email);
+      await deleteDoc(docRef);
+      setHasRequestedDeletion(false);
+      Alert.alert("Success", "Data deletion request has been canceled.");
+    } catch (error) {
+      console.log("Cancel Deletion Error:", error.message);
+      Alert.alert("Error", error.message);
     }
   };
 
@@ -142,35 +194,18 @@ export default function Profile() {
       </View>
 
       <View style={styles.menuContainer}>
-        <TouchableOpacity
-          style={styles.menuItem}
-          onPress={() => router.push("/addCourse")}
-        >
-          <Ionicons
-            name="add-circle-outline"
-            size={24}
-            color={Colors.LANDING}
-          />
+        <TouchableOpacity style={styles.menuItem} onPress={() => router.push("/addCourse")}>
+          <Ionicons name="add-circle-outline" size={24} color={Colors.LANDING} />
           <Text style={styles.menuText}>Add Course</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity
-          style={styles.menuItem}
-          onPress={() => router.push("/progress")}
-        >
+        <TouchableOpacity style={styles.menuItem} onPress={() => router.push("/mycourses/mycourses")}>
           <MaterialIcons name="menu-book" size={24} color={Colors.LANDING} />
           <Text style={styles.menuText}>My Course</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity
-          style={styles.menuItem}
-          onPress={() => router.push("/progress")}
-        >
-          <Ionicons
-            name="trending-up-outline"
-            size={24}
-            color={Colors.LANDING}
-          />
+        <TouchableOpacity style={styles.menuItem} onPress={() => router.push("/progress")}>
+          <Ionicons name="trending-up-outline" size={24} color={Colors.LANDING} />
           <Text style={styles.menuText}>Course Progress</Text>
         </TouchableOpacity>
 
@@ -179,11 +214,46 @@ export default function Profile() {
           <Text style={styles.menuText}>Change Password</Text>
         </TouchableOpacity>
 
+        {hasRequestedDeletion ? (
+          <TouchableOpacity style={styles.menuItem} onPress={handleCancelDeletion}>
+            <MaterialIcons name="cancel" size={24} color={Colors.LANDING} />
+            <Text style={styles.menuText}>Cancel Data Deletion</Text>
+          </TouchableOpacity>
+        ) : (
+          <TouchableOpacity style={styles.menuItem} onPress={() => setShowReasonModal(true)}>
+            <Ionicons name="trash-outline" size={24} color={Colors.RED} />
+            <Text style={[styles.menuText, { color: Colors.RED }]}>Request Data Deletion</Text>
+          </TouchableOpacity>
+        )}
+
         <TouchableOpacity style={styles.menuItem} onPress={handleLogout}>
           <Ionicons name="log-out-outline" size={24} color={Colors.RED} />
           <Text style={[styles.menuText, { color: Colors.RED }]}>Logout</Text>
         </TouchableOpacity>
       </View>
+
+      {/* Deletion Reason Modal */}
+      <Modal visible={showReasonModal} animationType="slide" transparent>
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <Text style={{ fontFamily: "manropebold", marginBottom: 10 }}>
+              Why do you want to delete your data?
+            </Text>
+            <TextInput
+              multiline
+              numberOfLines={4}
+              placeholder="Type your reason here..."
+              style={styles.textInput}
+              value={deletionReason}
+              onChangeText={setDeletionReason}
+            />
+            <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
+              <Button title="Cancel" color="gray" onPress={() => setShowReasonModal(false)} />
+              <Button title="Submit" onPress={handleRequestDeletion} />
+            </View>
+          </View>
+        </View>
+      </Modal>
     </ScrollView>
   );
 }
@@ -261,5 +331,25 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontFamily: "manrope",
     color: Colors.BLACK,
+  },
+  modalOverlay: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "rgba(0,0,0,0.5)",
+  },
+  modalContent: {
+    width: "85%",
+    backgroundColor: "white",
+    padding: 20,
+    borderRadius: 10,
+  },
+  textInput: {
+    borderColor: "#ccc",
+    borderWidth: 1,
+    borderRadius: 8,
+    padding: 10,
+    marginBottom: 20,
+    fontFamily: "manrope",
   },
 });

@@ -14,31 +14,35 @@ import {
 import Colors from "../constant/Colors";
 import { auth, db } from "./../config/firebaseConfig";
 
+
 export default function Index() {
   const router = useRouter();
   const { setUserDetail } = useContext(UserDetailContext);
   const [checkingAuth, setCheckingAuth] = useState(true); // 🔄 Loader flag
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (user) => {
-      if (user) {
-        try {
-          const result = await getDoc(doc(db, "users", user.email));
-          if (result.exists()) {
-            setUserDetail(result.data());
-          }
-          router.replace("/(tabs)/home");
-        } catch (error) {
-          console.error("Failed to fetch user detail:", error);
-          setCheckingAuth(false);
-        }
-      } else {
-        setCheckingAuth(false); // ✅ No user, show landing screen
-      }
-    });
+  
 
-    return unsubscribe;
-  }, []);
+  const unsubscribe = onAuthStateChanged(auth, async (user) => {
+    if (user) {
+      try {
+        const result = await getDoc(doc(db, "users", user.email));
+        if (result.exists()) {
+          setUserDetail(result.data());
+        }
+        router.replace("/(tabs)/home");
+      } catch (error) {
+        console.error("Failed to fetch user detail:", error);
+        setCheckingAuth(false);
+      }
+    } else {
+      setCheckingAuth(false);
+    }
+  });
+
+  return unsubscribe;
+}, []);
+
 
   if (checkingAuth) {
     // 🔃 Show loading spinner during auth check
